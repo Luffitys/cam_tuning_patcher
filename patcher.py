@@ -9,7 +9,7 @@ patches = [
         'lookup':           'anr10_ipe', #SEARCHES THIS STRING
         'dataoffset':           0xC0, #hex; offset from file beginning to data section offset
         'offset':               0x27, #hex; offset from anr10_ipe to its data section offset
-        'blockoffset':          0x0, #hex without '0x'; offset from anr10_ipe data section to (HIGH_PASS) luma noise reduction
+        'blockoffset':          0x0, #offset from anr10_ipe data section to (HIGH_PASS) luma noise reduction
         'checkbytes':            True, #Check byte(s) for 'original' byte hit before replacing
         'original':             '01', #hex without '0x'
         'modified':             '00', #hex without '0x'
