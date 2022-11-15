@@ -6,21 +6,55 @@ import shutil
 patches = [
 	{
         'patchname':            'Disable Luma Noise Reduction',
-        'lookup':           'anr10_ipe', #SEARCHES THIS STRING
+        'lookup':               'anr10_ipe', #SEARCHES THIS STRING
         'dataoffset':           0xC0, #hex; offset from file beginning to data section offset
         'offset':               0x27, #hex; offset from anr10_ipe to its data section offset
-        'blockoffset':          0x0, #offset from anr10_ipe data section to (HIGH_PASS) luma noise reduction
-        'checkbytes':            True, #Check byte(s) for 'original' byte hit before replacing
+        'blockoffset':          0x98, #offset from anr10_ipe data section to (HIGH_PASS) luma noise reduction
         'original':             '01', #hex without '0x'
         'modified':             '00', #hex without '0x'
 	},
 	{
-        'patchname':            'Disable Edge Detection',
-        'lookup':           'asf30_ipe', #SEARCHES THIS STRING
+        'patchname':            'Disable Edge Detection (ENTIRELY)',
+        'lookup':               'asf30_ipe', #SEARCHES THIS STRING
         'dataoffset':           0xC0, #hex; offset from file beginning to data section offset
         'offset':               0x27, #hex; offset from asf30_ipe to its data section offset
-        'blockoffset':          0x0, #hex without '0x'; offset from asf30_ipe data section to ... REMOVE IT REMOVE IT REMOVE IT: if (patch['blockoffset'][n] != 0): ... seek ...
-        'checkbytes':            True, #Check byte(s) for 'original' byte hit before replacing
+        'blockoffset':          0x0, #hex without '0x'; offset from asf30_ipe data section to // (start of data section)
+        'original':             '01', #hex without '0x'
+        'modified':             '00', #hex without '0x'
+	},
+	{
+        'patchname':            'Disable Edge Detection (layer 1)',
+        'lookup':               'asf30_ipe', #SEARCHES THIS STRING
+        'dataoffset':           0xC0, #hex; offset from file beginning to data section offset
+        'offset':               0x27, #hex; offset from asf30_ipe to its data section offset
+        'blockoffset':          0xC8, #hex without '0x'; offset from asf30_ipe data section to layer_1 section
+        'original':             '01', #hex without '0x'
+        'modified':             '00', #hex without '0x'
+	},
+	{
+        'patchname':            'Disable Edge Detection (layer 2)',
+        'lookup':               'asf30_ipe', #SEARCHES THIS STRING
+        'dataoffset':           0xC0, #hex; offset from file beginning to data section offset
+        'offset':               0x27, #hex; offset from asf30_ipe to its data section offset
+        'blockoffset':          0xD0, #hex without '0x'; offset from asf30_ipe data section to layer_2 section
+        'original':             '01', #hex without '0x'
+        'modified':             '00', #hex without '0x'
+	},
+	{
+        'patchname':            'Disable Edge Detection (radial)',
+        'lookup':               'asf30_ipe', #SEARCHES THIS STRING
+        'dataoffset':           0xC0, #hex; offset from file beginning to data section offset
+        'offset':               0x27, #hex; offset from asf30_ipe to its data section offset
+        'blockoffset':          0xD8, #hex without '0x'; offset from asf30_ipe data section to radial section
+        'original':             '01', #hex without '0x'
+        'modified':             '00', #hex without '0x'
+	},
+	{
+        'patchname':            'Disable Edge Detection (contrast)',
+        'lookup':               'asf30_ipe', #SEARCHES THIS STRING
+        'dataoffset':           0xC0, #hex; offset from file beginning to data section offset
+        'offset':               0x27, #hex; offset from asf30_ipe to its data section offset
+        'blockoffset':          0xE0, #hex without '0x'; offset from asf30_ipe data section to contrast section
         'original':             '01', #hex without '0x'
         'modified':             '00', #hex without '0x'
 	},
@@ -97,7 +131,7 @@ def patch_process(filename, n):
                     string = patch['lookup'].encode('utf-8')
                     #checks for current patching hit. avoids infinite while True: loop from never stopping
                     if f.read(len(string)).hex() == string.hex() and count < num_hit:
-                        print('found ' + patch['lookup']+'!')
+                        print('found ' + patch['lookup'] + ' (' + patch['patchname'] + ')' + '!')
                         #save current location for later use
                         location = f.tell()
                         #go from patch['lookup'] to offset that stores the data block offset
@@ -118,17 +152,16 @@ def patch_process(filename, n):
                         print('value: ' + f.read(len(patch['original'])//2).hex())
                         #go back to previous location
                         f.seek(new_offset)
-                        if patch['checkbytes'] == True:
-                            #checks if original byte == patch['original'] byte
-                            if f.read(len(patch['original'])//2).hex() == patch['original']:
-                                #go back to previous location
-                                f.seek(new_offset)
-                                #patch byte(s)
-                                f.write(bytes.fromhex(patch['modified']))
-                                #go back to previous location
-                                f.seek(new_offset)
-                                print('new value: ' + str(f.read(len(patch['modified'])//2).hex()))
-                                matches += 1
+                        #checks if original byte == patch['original'] byte
+                        if f.read(len(patch['original'])//2).hex() == patch['original']:
+                            #go back to previous location
+                            f.seek(new_offset)
+                            #patch byte(s)
+                            f.write(bytes.fromhex(patch['modified']))
+                            #go back to previous location
+                            f.seek(new_offset)
+                            print('new value: ' + str(f.read(len(patch['modified'])//2).hex()))
+                            matches += 1
                         #goes back to origin location
                         f.seek(location)
                         print(' ')
