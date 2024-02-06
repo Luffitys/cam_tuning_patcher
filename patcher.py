@@ -62,18 +62,25 @@ patches = [
 
 def patch_start(patches=None):
     filename = input('\nEnter the full file name of your tuning .bin\nExample: com.qti.tuned.umi_semco_s5khmx.bin\n------\n: ')
+    inputFile = 'input/' + filename
+    outputFile = 'output/' + filename
 
-    #backup original file
-    if os.path.exists(filename + '.bak') == False:
-        shutil.copyfile(filename, filename + '.bak')
+    patchNum=0
+    
+    if not os.path.exists(inputFile):
+        print("Selected file doesn't exist. Aborting..")
+        return
 
-    print('\nFollowing patches are available:\n')
-    num=0
+    #create output file
+    if os.path.exists(outputFile):
+        os.remove(outputFile)
+    shutil.copyfile(inputFile, outputFile)
 
     #list all patches
+    print('\nFollowing patches are available:\n')
     for patch in patches:
-        print('(' + str(num) + ') ' + '[' + patch['patchname'] + ' ' + '(' +  patch['lookup'] + ')' + ']')
-        num=num+1
+        print('(' + str(patchNum) + ') ' + '[' + patch['patchname'] + ' ' + '(' +  patch['lookup'] + ')' + ']')
+        patchNum=patchNum+1
 
     #patch selection input
     str_arr = input('\nEnter your desired patch(es). Separated by comma(s) (,). Or type all (all). (e.g. 0,1): ')
@@ -91,7 +98,7 @@ def patch_start(patches=None):
 
     #execute patching process for each selected patch
     for n in patch_arr:
-        patch_process(filename, n)
+        patch_process(outputFile, n)
 
     #avoid exit without user input
     print("\nPatches have been applied!\n\nPress Enter to exit ...")
@@ -105,8 +112,8 @@ def hex_to_big_little_int(hex):
     int_little = int(str_little,base=16)
     return int_little
 
-def patch_process(filename, n):
-    with open(filename, 'r+b') as f:
+def patch_process(outputFile, n):
+    with open(outputFile, 'r+b') as f:
         for index, patch in enumerate(patches):
             #checks if current list index is selected to be patched by user
             if index == n:
